@@ -15,7 +15,7 @@ public class Main {
                 new Task(4, "task4", TaskStatus.IN_PROGRESS));
 
 
-        List<Task> tasksByStatus = tasks.stream().filter(task -> TaskStatus.IN_PROGRESS.equals(task.getStatus())).toList();
+        List<Task> tasksByStatus = tasks.stream().filter(task -> TaskStatus.IN_PROGRESS == task.getStatus()).toList();
         System.out.println("tasksByStatus = " + tasksByStatus);
 
         boolean taskExistsById = tasks.stream().anyMatch(t -> t.getId().equals(1));
@@ -24,7 +24,7 @@ public class Main {
         List<Task> sortedByStatus = tasks.stream().sorted(Comparator.comparing(Task::getStatus)).toList();
         System.out.println("sortedByStatus = " + sortedByStatus);
 
-        long countByType = tasks.stream().filter(task -> TaskStatus.OPEN.equals(task.getStatus())).count();
+        long countByType = tasks.stream().filter(task -> TaskStatus.OPEN == task.getStatus()).count();
         System.out.println("countByType = " + countByType);
     }
 }
