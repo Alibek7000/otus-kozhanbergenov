@@ -1,3 +1,4 @@
 rootProject.name = 'otus-kozhanbergenov'
 include 'reflection-api'
+include 'stream-api'
 
