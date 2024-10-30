@@ -8,12 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ThreadPull {
 
     private final List<Runnable> taskQueue = new LinkedList<>();
-    Semaphore semaphore;
-    AtomicBoolean enabled = new AtomicBoolean(true);
-    private final List<Thread> workers;
+    private Semaphore semaphore;
+    private AtomicBoolean enabled = new AtomicBoolean(true);
+    private final List<Thread> workers = new LinkedList<>();
 
     public ThreadPull(int numberOfThreads) {
-        this.workers = new LinkedList<>();
         runThreads(numberOfThreads);
     }
 
@@ -36,6 +35,7 @@ public class ThreadPull {
                             semaphore.acquire();
                             task.run();
                         } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
                             System.out.println(Thread.currentThread().getName() + " interrupted");
                         } finally {
                             semaphore.release();
@@ -60,6 +60,9 @@ public class ThreadPull {
 
     public synchronized void shutdown() {
         enabled.set(false);
+        synchronized (taskQueue) {
+            taskQueue.notifyAll(); // Освобождение заблокированных потоков
+        }
         for (Thread worker : workers) {
             worker.interrupt();
         }
