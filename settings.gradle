@@ -2,4 +2,5 @@ rootProject.name = 'otus-kozhanbergenov'
 include 'reflection-api'
 include 'stream-api'
 include 'concurrency'
+include 'patterns'
 
