@@ -20,10 +20,6 @@ public class ColorFirstIterator implements Iterator<String> {
 
     @Override
     public boolean hasNext() {
-        if (currentIndex == itemsCount - 1) {
-            currentMatryoshkaIndex++;
-            currentIndex = 0;
-        }
         return currentMatryoshkaIndex < matryoshkas.size() && currentIndex < itemsCount;
     }
 
@@ -33,6 +29,11 @@ public class ColorFirstIterator implements Iterator<String> {
             throw new NoSuchElementException();
         }
         Matryoshka matryoshka = matryoshkas.get(currentMatryoshkaIndex);
-        return matryoshka.getItems().get(currentIndex++);
+        String result = matryoshka.getItems().get(currentIndex++);
+        if (currentIndex == itemsCount - 1) {
+            currentMatryoshkaIndex++;
+            currentIndex = 0;
+        }
+        return result;
     }
 }

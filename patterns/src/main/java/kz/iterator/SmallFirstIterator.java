@@ -20,10 +20,6 @@ public class SmallFirstIterator implements Iterator<String> {
 
     @Override
     public boolean hasNext() {
-        if (currentMatryoshkaIndex > matryoshkas.size() - 1) {
-            currentMatryoshkaIndex = 0;
-            currentIndex++;
-        }
         return currentMatryoshkaIndex < matryoshkas.size() && currentIndex < itemsCount;
     }
 
@@ -33,6 +29,11 @@ public class SmallFirstIterator implements Iterator<String> {
             throw new NoSuchElementException();
         }
         Matryoshka matryoshka = matryoshkas.get(currentMatryoshkaIndex++);
-        return matryoshka.getItems().get(currentIndex);
+        String result = matryoshka.getItems().get(currentIndex);
+        if (currentMatryoshkaIndex > matryoshkas.size() - 1) {
+            currentMatryoshkaIndex = 0;
+            currentIndex++;
+        }
+        return result;
     }
 }
