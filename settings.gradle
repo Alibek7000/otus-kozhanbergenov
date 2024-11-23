@@ -3,4 +3,5 @@ include 'reflection-api'
 include 'stream-api'
 include 'concurrency'
 include 'patterns'
+include 'pattern-2'
 
