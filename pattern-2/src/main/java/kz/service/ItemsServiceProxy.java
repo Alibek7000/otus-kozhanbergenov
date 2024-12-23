@@ -2,12 +2,14 @@ package kz.service;
 
 
 import kz.dao.DataSource;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 
+@Slf4j
 public class ItemsServiceProxy {
 
     public static ItemsService create(ItemsService itemsService) {
@@ -35,6 +37,7 @@ public class ItemsServiceProxy {
                 return result;
             } catch (Exception e) {
                 connection.rollback();
+                log.error(e.getMessage(), e);
                 throw e;
             } finally {
                 DataSource.getInstance().closeConnection();
