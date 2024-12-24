@@ -4,4 +4,5 @@ include 'stream-api'
 include 'concurrency'
 include 'patterns'
 include 'pattern-2'
+include 'jdbc-java'
 
