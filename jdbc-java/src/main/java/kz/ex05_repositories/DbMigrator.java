@@ -11,11 +11,12 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 
 public class DbMigrator {
-    private DataSource dataSource;
-    URL resource = DbMigrator.class.getClassLoader().getResource("init.sql");
+    private final DataSource dataSource;
+    private final URL resource;
 
     public DbMigrator(DataSource dataSource) {
         this.dataSource = dataSource;
+        this.resource = DbMigrator.class.getClassLoader().getResource("init.sql");
     }
 
     public void migrate() throws URISyntaxException, IOException, SQLException {

@@ -68,14 +68,14 @@ public class AbstractRepository<T> {
                 getSetter(field);
             } catch (NoSuchMethodException e) {
                 throw new ApplicationInitializationException(
-                        "Missing getter or setter for field: " + field.getName() + " in class " + clazz.getName());
+                        "Missing getter or setter for field: " + field.getName() + " in class " + clazz.getName(), e);
             }
         }
     }
 
     public void create(T entity) {
         try {
-            Long id = getId();
+            Long id = generateNextId();
             psCreate.setObject(1, id);
             for (int i = 0; i < cachedFields.size(); i++) {
                 Field field = cachedFields.get(i);
@@ -85,7 +85,7 @@ public class AbstractRepository<T> {
             }
             psCreate.executeUpdate();
         } catch (Exception e) {
-            throw new ApplicationInitializationException("Exception on create object to class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on create object to class " + clazz.getName(), e);
         }
     }
 
@@ -104,7 +104,7 @@ public class AbstractRepository<T> {
             psUpdate.setObject(cachedFields.size() + 1, id);
             psUpdate.executeUpdate();
         } catch (Exception e) {
-            throw new ApplicationInitializationException("Exception on update object to class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on update object to class " + clazz.getName(), e);
         }
     }
 
@@ -117,7 +117,7 @@ public class AbstractRepository<T> {
                 result = fillEntity(rs);
             }
         } catch (Exception e) {
-            throw new ApplicationInitializationException("Exception on findById " + id + " for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on findById " + id + " for class " + clazz.getName(), e);
         }
         return result;
     }
@@ -127,7 +127,7 @@ public class AbstractRepository<T> {
             psDeleteById.setObject(1, id);
             psDeleteById.executeUpdate();
         } catch (Exception e) {
-            throw new ApplicationInitializationException("Exception on deleteById " + id + " for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on deleteById " + id + " for class " + clazz.getName(), e);
         }
     }
 
@@ -135,7 +135,7 @@ public class AbstractRepository<T> {
         try {
             psDeleteAll.executeUpdate();
         } catch (Exception e) {
-            throw new ApplicationInitializationException("Exception on deleteAll for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on deleteAll for class " + clazz.getName(), e);
         }
     }
 
@@ -147,7 +147,7 @@ public class AbstractRepository<T> {
                 out.add(fillEntity(rs));
             }
         } catch (Exception e) {
-            throw new ApplicationInitializationException("Exception on findAll for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on findAll for class " + clazz.getName(), e);
         }
         return out;
     }
@@ -181,28 +181,23 @@ public class AbstractRepository<T> {
         StringBuilder query = new StringBuilder("insert into ");
         String tableName = clazz.getAnnotation(RepositoryTable.class).title();
         query.append(tableName).append(" (");
-        // 'insert into users ('
         query.append(getTableFieldName(idField)).append(", ");
         for (Field f : cachedFields) {
             String fieldName = getTableFieldName(f);
             query.append(fieldName).append(", ");
         }
-        // 'insert into users (id, login, password, nickname, '
         query.setLength(query.length() - 2);
-        // 'insert into users (id, login, password, nickname'
         query.append(") values (");
         query.append("?, ");
         for (Field f : cachedFields) {
             query.append("?, ");
         }
-        // 'insert into users (id, login, password, nickname) values (?, ?, ?, ?, '
         query.setLength(query.length() - 2);
-        // 'insert into users (id, login, password, nickname) values (?, ?, ?, ?'
         query.append(");");
         try {
             psCreate = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareInsert for class " + clazz.getName());
+            throw new ApplicationInitializationException("SQL exception during update: " + e.getMessage(), e);
         }
     }
 
@@ -219,7 +214,7 @@ public class AbstractRepository<T> {
         try {
             psUpdate = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareUpdate for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on prepareUpdate for class " + clazz.getName(), e);
         }
     }
 
@@ -243,7 +238,7 @@ public class AbstractRepository<T> {
         try {
             psGetId = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareGetId for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on prepareGetId for class " + clazz.getName(), e);
         }
     }
 
@@ -256,7 +251,7 @@ public class AbstractRepository<T> {
         try {
             psFindById = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareFindById for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on prepareFindById for class " + clazz.getName(), e);
         }
     }
 
@@ -269,7 +264,7 @@ public class AbstractRepository<T> {
         try {
             psDeleteAll = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareDeleteAll for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on prepareDeleteAll for class " + clazz.getName(), e);
         }
     }
 
@@ -282,7 +277,7 @@ public class AbstractRepository<T> {
         try {
             psDeleteById = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareDeleteById for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on prepareDeleteById for class " + clazz.getName(), e);
         }
     }
 
@@ -294,11 +289,11 @@ public class AbstractRepository<T> {
         try {
             psFindAll = dataSource.getConnection().prepareStatement(query.toString());
         } catch (SQLException e) {
-            throw new ApplicationInitializationException("Exception on prepareFindAll for class " + clazz.getName());
+            throw new ApplicationInitializationException("Exception on prepareFindAll for class " + clazz.getName(), e);
         }
     }
 
-    private Long getId() {
+    private Long generateNextId() {
         Long result = 0L;
         try {
             ResultSet rs = psGetId.executeQuery();
